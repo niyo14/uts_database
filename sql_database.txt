@@ -1,0 +1,87 @@
+-- ============================================================
+--  DATABASE UNTUK UTS: Sistem Basis Data untuk IoT & Instrumentasi
+--  Tema: Pemantauan Suhu dan Kelembapan Ruang Laboratorium
+-- ============================================================
+
+-- 1️⃣ Buat database
+CREATE DATABASE IF NOT EXISTS lab_iot;
+USE lab_iot;
+
+-- ============================================================
+-- 2️⃣ Tabel TEKNISI
+-- ============================================================
+CREATE TABLE teknisi (
+  id_teknisi VARCHAR(10) PRIMARY KEY,
+  nama_teknisi VARCHAR(50) NOT NULL,
+  nomor_hp VARCHAR(15)
+);
+
+-- ============================================================
+-- 3️⃣ Tabel NODE_SENSOR
+-- Setiap sensor terpasang di ruangan tertentu dan ditangani oleh satu teknisi
+-- ============================================================
+CREATE TABLE node_sensor (
+  id_sensor VARCHAR(10) PRIMARY KEY,
+  nama_ruangan VARCHAR(50) NOT NULL,
+  id_teknisi VARCHAR(10),
+  FOREIGN KEY (id_teknisi) REFERENCES teknisi(id_teknisi)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+);
+
+-- ============================================================
+-- 4️⃣ Tabel SENSOR_DATA
+-- Menyimpan data hasil pembacaan sensor suhu dan kelembapan
+-- ============================================================
+CREATE TABLE sensor_data (
+  id_data INT AUTO_INCREMENT PRIMARY KEY,
+  id_sensor VARCHAR(10),
+  suhu FLOAT,
+  kelembapan FLOAT,
+  waktu_pengiriman DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_sensor) REFERENCES node_sensor(id_sensor)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+);
+
+-- ============================================================
+-- 5️⃣ Data Dummy (contoh untuk Soal 3)
+-- ============================================================
+
+-- Data teknisi
+INSERT INTO teknisi (id_teknisi, nama_teknisi, nomor_hp) VALUES
+('T01', 'Niyo Tampubolon', '08123456789'),
+('T02', 'Andi Pratama', '082233445566');
+
+-- Data node sensor
+INSERT INTO node_sensor (id_sensor, nama_ruangan, id_teknisi) VALUES
+('S01', 'Ruang IoT', 'T01'),
+('S02', 'Ruang Robotika', 'T02');
+
+-- Data sensor_data
+INSERT INTO sensor_data (id_sensor, suhu, kelembapan) VALUES
+('S01', 29.5, 65),
+('S01', 30.2, 60),
+('S01', 28.8, 68),
+('S02', 27.5, 70),
+('S02', 31.0, 58),
+('S02', 29.0, 64);
+
+-- ============================================================
+-- 6️⃣ Query Latihan (Soal Nomor 3)
+-- ============================================================
+
+-- a. Menampilkan semua data sensor dengan suhu > 30°C
+SELECT * FROM sensor_data WHERE suhu > 30;
+
+-- b. Menghitung rata-rata suhu per sensor
+SELECT id_sensor, AVG(suhu) AS rata_suhu
+FROM sensor_data
+GROUP BY id_sensor;
+
+-- c. Menambahkan data sensor baru
+INSERT INTO sensor_data (id_sensor, suhu, kelembapan)
+VALUES ('S01', 29.5, 60);
+
+-- d. Menghapus data sensor dengan id_data = 10
+DELETE FROM sensor_data WHERE id_data = 10;
